@@ -1,0 +1,43 @@
+trigger: none
+
+schedules:
+- cron: "0 2 * * *"    # every day 02:00 UTC
+  displayName: Daily LLM scan
+  branches:
+    include:
+      - main
+  always: true
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  ORCHESTRATOR_DIR: 'orchestrator'
+  RESULTS_DIR: 'orchestrator/results'
+  MODELS: 'llama3.2,custom-model'  # override in pipeline variables for production
+
+steps:
+- checkout: self
+
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.11'
+
+- script: |
+    python -m pip install --upgrade pip
+    pip install -r $(ORCHESTRATOR_DIR)/requirements.txt
+  displayName: 'Install dependencies'
+
+- script: |
+    export MODELS=$(MODELS)
+    export RESULTS_DIR=$(RESULTS_DIR)
+    export LM_ENDPOINT=$(LM_ENDPOINT)
+    python $(ORCHESTRATOR_DIR)/orchestrator.py
+  displayName: 'Run orchestrator'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(RESULTS_DIR)'
+    ArtifactName: 'llm-scan-results'
+    publishLocation: 'Container'
+  displayName: 'Publish results artifacts'

@@ -1,0 +1,5 @@
+requests>=2.28
+pandas>=2.0
+sentence-transformers>=2.2.2    # si tu veux calculer similarités d'embeddings
+numpy>=1.25
+python-dotenv>=1.0.0

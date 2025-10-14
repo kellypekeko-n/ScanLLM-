@@ -1,0 +1,63 @@
+# LLM Security Platform - Configuration
+# Configuration pour l'orchestrateur et les tests de sécurité
+
+# Configuration LLM
+llm:
+  endpoint: "http://localhost:11434"  # LM Studio par défaut
+  model: "llama2"  # Modèle à utiliser
+  timeout: 30  # Timeout en secondes
+  max_tokens: 500  # Nombre maximum de tokens par réponse
+
+# Configuration des tests
+tests:
+  structural_probe:
+    enabled: true
+    max_attempts: 5
+    temperature: 0.1
+    
+  role_sensitivity:
+    enabled: true
+    roles: ["admin", "user", "guest"]
+    temperature: 0.3
+    
+  rag_audit:
+    enabled: true
+    max_documents: 10
+    temperature: 0.2
+    
+  prompt_injection:
+    enabled: true
+    max_attempts: 10
+    temperature: 0.3
+    
+  safety_bypass:
+    enabled: true
+    max_attempts: 10
+    temperature: 0.3
+
+# Configuration de sortie
+output:
+  format: "json"  # json, yaml, csv
+  save_to_file: true
+  output_dir: "./results"
+  include_timestamps: true
+
+
+  
+# Configuration de logging
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "./logs/security_analysis.log"
+  
+# Configuration de sécurité
+security:
+  max_concurrent_tests: 3
+  rate_limit_delay: 1.0  # Délai entre les requêtes (secondes)
+  sensitive_data_patterns:
+    - "password"
+    - "api_key"
+    - "secret"
+    - "token"
+    - "credential"
+

@@ -1,0 +1,67 @@
+# LLM Security Platform - Configuration de Démonstration
+# Configuration optimisée pour la démonstration de la plateforme
+
+# Configuration LLM (simulation pour la démo)
+llm:
+  endpoint: "http://localhost:11434"  # LM Studio par défaut
+  model: "llama2"  # Modèle de démonstration
+  timeout: 15  # Timeout réduit pour la démo
+  max_tokens: 200  # Limite de tokens pour la démo
+
+# Configuration des tests (tous activés pour la démo)
+tests:
+  structural_probe:
+    enabled: true
+    max_attempts: 3  # Réduit pour la démo
+    temperature: 0.1
+    
+  role_sensitivity:
+    enabled: true
+    roles: ["admin", "user", "guest"]
+    temperature: 0.3
+    
+  rag_audit:
+    enabled: true
+    max_documents: 5  # Réduit pour la démo
+    temperature: 0.2
+    
+  prompt_injection:
+    enabled: true
+    max_attempts: 5  # Réduit pour la démo
+    temperature: 0.3
+    
+  safety_bypass:
+    enabled: true
+    max_attempts: 5  # Réduit pour la démo
+    temperature: 0.3
+
+# Configuration de sortie (optimisée pour la démo)
+output:
+  format: "json"
+  save_to_file: true
+  output_dir: "./demo_results"
+  include_timestamps: true
+  
+# Configuration de logging (niveau démo)
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "./logs/demo.log"
+  
+# Configuration de sécurité (relaxée pour la démo)
+security:
+  max_concurrent_tests: 2  # Réduit pour la démo
+  rate_limit_delay: 0.5  # Délai réduit
+  sensitive_data_patterns:
+    - "password"
+    - "api_key"
+    - "secret"
+    - "token"
+    - "credential"
+
+# Configuration de démonstration
+demo:
+  enabled: true
+  mock_llm: true  # Utilise un mock LLM si LM Studio n'est pas disponible
+  quick_mode: true  # Mode rapide pour la démo
+  verbose_output: true  # Sortie détaillée

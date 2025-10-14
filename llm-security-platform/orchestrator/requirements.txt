@@ -1,0 +1,17 @@
+# LLM Security Platform - Orchestrator Dependencies
+# Core dependencies
+aiohttp>=3.8.0
+asyncio
+pyyaml>=6.0
+requests>=2.28.0
+
+# Logging and utilities
+colorama>=0.4.6
+rich>=13.0.0
+
+# Development dependencies (optional)
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+black>=22.0.0
+flake8>=5.0.0
+

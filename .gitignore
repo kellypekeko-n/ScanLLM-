@@ -1,0 +1,23 @@
+# Environnements virtuels
+venv/
+env/
+
+# Dossiers IDE
+.idea/
+.vscode/
+.vs/
+
+# Fichiers Python temporaires
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Logs, data, etc.
+*.log
+*.csv
+*.dat
+*.tmp
+
+# Configurations locales
+.env
