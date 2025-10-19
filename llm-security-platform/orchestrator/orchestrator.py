@@ -19,6 +19,8 @@ from tests.role_sensitivity import RoleSensitivityTest
 from tests.rag_audit import RAGAuditTest
 from tests.prompt_injection import PromptInjectionTest
 from tests.safety_bypass import SafetyBypassTest
+from tests.extraction_probe import ExtractionProbeTest
+from tests.fingerprinting import FingerprintingTest
 
 
 class LLMSecurityOrchestrator:
@@ -92,7 +94,9 @@ class LLMSecurityOrchestrator:
                 'role_sensitivity': {'enabled': True, 'roles': ['admin', 'user', 'guest']},
                 'rag_audit': {'enabled': True, 'max_documents': 10},
                 'prompt_injection': {'enabled': True},
-                'safety_bypass': {'enabled': True}
+                'safety_bypass': {'enabled': True},
+                'extraction_probe': {'enabled': True},
+                'fingerprinting': {'enabled': True}
             },
             'output': {
                 'format': 'json',
@@ -116,6 +120,10 @@ class LLMSecurityOrchestrator:
             plugins['prompt_injection'] = PromptInjectionTest(self.config)
         if cfg.get('safety_bypass', {}).get('enabled', False):
             plugins['safety_bypass'] = SafetyBypassTest(self.config)
+        if cfg.get('extraction_probe', {}).get('enabled', False):
+            plugins['extraction_probe'] = ExtractionProbeTest(self.config)
+        if cfg.get('fingerprinting', {}).get('enabled', False):
+            plugins['fingerprinting'] = FingerprintingTest(self.config)
 
         return plugins
 

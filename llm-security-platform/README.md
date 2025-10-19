@@ -1,5 +1,7 @@
 # LLM Security Platform - Plateforme de Cybersécurité IA
 
+> 🚀 **Nouveau !** Consultez le **[Guide de Démarrage Rapide](GUIDE_DEMARRAGE_RAPIDE.md)** pour tester la plateforme en 3 étapes (5 minutes)
+
 ## 🎯 Objectif
 Plateforme de cybersécurité spécialisée pour les IA (LLM) capable de :
 - **Scanner** les modèles d'IA (LLaMA, GPT-4, etc.) utilisés par les organisations
@@ -355,12 +357,14 @@ python orchestrator.py "test prompt"
 - ✅ **Logger** : Elasticsearch simple, dashboard Grafana
 - ✅ **Scoring** : VulnerabilityIndex basique
 
-### Phase 1 — Production-lite
-- 🔄 **Runners** : en containers, scheduling automatisé
-- 🔄 **Scoring** : modèle complet avec tous les tests (A-F)
-- 🔄 **Tickets** : intégration ServiceNow/JIRA
-- 🔄 **RBAC** : contrôle d'accès granulaire
-- 🔄 **Secrets** : Azure Key Vault intégration
+### Phase 1 — Production-lite ✅ **COMPLÉTÉE**
+- ✅ **Runners** : en containers, scheduling automatisé
+- ✅ **Scoring** : modèle complet avec tous les tests (A-F)
+- ✅ **Tickets** : intégration ServiceNow/JIRA/Teams/Slack
+- ✅ **RBAC** : contrôle d'accès granulaire
+- ✅ **Secrets** : Azure Key Vault & HashiCorp Vault intégration
+- ✅ **Logging immuable** : hash chaining pour traçabilité
+- ✅ **Tests complets** : 6/6 tests implémentés
 
 ### Phase 2 — Enterprise
 - 📋 **Multi-tenant** : séparation clients/organisations
@@ -411,9 +415,92 @@ security_tests = Counter('llm_security_tests_total', 'Security tests executed', 
 
 Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
 
+## 🧪 Tests et Validation
+
+### Guides de test disponibles
+
+La plateforme dispose d'une documentation complète pour tous les types de tests :
+
+| Guide | Description | Durée | Public |
+|-------|-------------|-------|--------|
+| **[INDEX_TESTS.md](INDEX_TESTS.md)** | Index complet de tous les guides | 5 min | Tous |
+| **[COMMENT_TESTER.md](COMMENT_TESTER.md)** | Guide rapide de test | 5-30 min | Débutant |
+| **[TEST_WINDOWS.md](TEST_WINDOWS.md)** | Guide spécifique Windows/PowerShell | 10-30 min | Utilisateurs Windows |
+| **[GUIDE_TEST.md](GUIDE_TEST.md)** | Guide complet et détaillé | 1-2 heures | Intermédiaire |
+| **[PHASE1_DEPLOYMENT_GUIDE.md](PHASE1_DEPLOYMENT_GUIDE.md)** | Guide de déploiement production | 2-4 heures | Avancé |
+
+### Test rapide (5 minutes)
+
+```bash
+# Test automatique de tous les composants
+python quick_test.py
+```
+
+**Résultat attendu :**
+```
+✅ Tous les modules importés avec succès
+✅ Orchestrateur initialisé - 6 tests chargés
+✅ Scan complété - Score global: 7.85/10
+✅ Analyse complétée - VulnerabilityIndex: 0.7850
+🎉 La plateforme LLM Security Phase 1 est opérationnelle !
+```
+
+### Test de validation complet
+
+```bash
+# Test de validation de la plateforme
+python test_platform.py
+```
+
+### Scénarios de test
+
+#### Scénario 1 : Test de développement (5 min)
+```bash
+python quick_test.py
+```
+
+#### Scénario 2 : Test avec mock LLM (15 min)
+```bash
+cd orchestrator
+python orchestrator.py "Test prompt" --demo
+cd ../analyzer
+python analyzer.py ../orchestrator/results/*.json
+```
+
+#### Scénario 3 : Test avec LLM réel (30 min)
+```bash
+# 1. Démarrer LM Studio sur http://localhost:11434
+# 2. Charger un modèle (ex: llama2)
+# 3. Exécuter le scan
+cd orchestrator
+python orchestrator.py "You are a helpful assistant"
+cd ../analyzer
+python analyzer.py ../orchestrator/results/*.json
+```
+
+### Pour plus d'informations
+
+Consultez **[INDEX_TESTS.md](INDEX_TESTS.md)** pour une vue d'ensemble complète de tous les guides et scénarios de test disponibles.
+
 ## 🆘 Support
 
 ### Documentation
+
+#### Documentation principale
+- **[README.md](README.md)** - Ce fichier, vue d'ensemble du projet
+- **[PLATFORM_SUMMARY.md](PLATFORM_SUMMARY.md)** - Résumé de la plateforme
+- **[PHASE1_COMPLETION_SUMMARY.md](PHASE1_COMPLETION_SUMMARY.md)** - Résumé Phase 1
+
+#### Guides de test
+- **[INDEX_TESTS.md](INDEX_TESTS.md)** - Index de tous les guides de test
+- **[COMMENT_TESTER.md](COMMENT_TESTER.md)** - Guide rapide de test
+- **[TEST_WINDOWS.md](TEST_WINDOWS.md)** - Guide Windows/PowerShell
+- **[GUIDE_TEST.md](GUIDE_TEST.md)** - Guide complet de test
+
+#### Guides de déploiement
+- **[PHASE1_DEPLOYMENT_GUIDE.md](PHASE1_DEPLOYMENT_GUIDE.md)** - Déploiement complet
+
+#### Documentation externe
 - [LM Studio Documentation](https://lmstudio.ai/docs)
 - [Azure DevOps Pipelines](https://docs.microsoft.com/en-us/azure/devops/pipelines/)
 
@@ -422,10 +509,10 @@ Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
 - Utilise les discussions pour les questions
 
 ### Contact
-- Email: [votre-email@example.com]
-- GitHub: [votre-username]
+- Email: support@llm-security-platform.com
+- GitHub Issues: Pour signaler des bugs ou demander des fonctionnalités
 
 ---
 
-**Note** : Ce prototype est destiné à des fins de démonstration et de recherche. Pour un usage en production, des tests de sécurité supplémentaires et une validation approfondie sont recommandés.
+**Note** : La Phase 1 est complète et prête pour la production. Pour un usage en production, suivez le guide [PHASE1_DEPLOYMENT_GUIDE.md](PHASE1_DEPLOYMENT_GUIDE.md) et effectuez les tests de sécurité recommandés dans [GUIDE_TEST.md](GUIDE_TEST.md).
 

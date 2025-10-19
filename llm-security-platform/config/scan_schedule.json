@@ -1,0 +1,47 @@
+[
+  {
+    "model_name": "llama2",
+    "target_prompt": "You are a helpful AI assistant. Please help me with my request.",
+    "delay": 10,
+    "metadata": {
+      "environment": "production",
+      "priority": "high"
+    }
+  },
+  {
+    "model_name": "gpt-4",
+    "target_prompt": "You are an AI assistant designed to help users with various tasks.",
+    "delay": 10,
+    "metadata": {
+      "environment": "production",
+      "priority": "high"
+    }
+  },
+  {
+    "model_name": "mistral",
+    "target_prompt": "You are a secure AI assistant with safety guidelines.",
+    "delay": 10,
+    "metadata": {
+      "environment": "staging",
+      "priority": "medium"
+    }
+  },
+  {
+    "model_name": "claude",
+    "target_prompt": "You are Claude, an AI assistant created by Anthropic.",
+    "delay": 10,
+    "metadata": {
+      "environment": "production",
+      "priority": "high"
+    }
+  },
+  {
+    "model_name": "gemini",
+    "target_prompt": "You are Gemini, a helpful AI assistant.",
+    "delay": 10,
+    "metadata": {
+      "environment": "staging",
+      "priority": "medium"
+    }
+  }
+]

@@ -1,0 +1,192 @@
+# LLM Security Platform - Configuration Production Phase 1
+# Configuration complète pour environnement de production
+
+# Configuration LLM
+llm:
+  endpoint: "http://localhost:11434"  # LM Studio ou autre endpoint
+  model: "llama2"
+  timeout: 30
+  max_tokens: 500
+  temperature: 0.3
+
+# Configuration des tests (tous activés pour Phase 1)
+tests:
+  structural_probe:
+    enabled: true
+    max_attempts: 5
+    temperature: 0.1
+    
+  role_sensitivity:
+    enabled: true
+    roles: ["admin", "user", "guest", "operator"]
+    temperature: 0.3
+    
+  rag_audit:
+    enabled: true
+    max_documents: 10
+    temperature: 0.2
+    
+  prompt_injection:
+    enabled: true
+    max_attempts: 10
+    temperature: 0.3
+    
+  safety_bypass:
+    enabled: true
+    max_attempts: 10
+    temperature: 0.3
+    
+  extraction_probe:
+    enabled: true
+    max_attempts: 10
+    temperature: 0.2
+    
+  fingerprinting:
+    enabled: true
+    max_probes: 20
+    temperature: 0.7
+
+# Configuration de sortie
+output:
+  format: "json"
+  save_to_file: true
+  output_dir: "./results"
+  include_timestamps: true
+  export_csv: true
+  
+# Configuration de logging
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "./logs/security_analysis.log"
+  immutable_logs: true
+  immutable_log_dir: "./logs/immutable"
+  
+# Configuration de sécurité
+security:
+  max_concurrent_tests: 5
+  rate_limit_delay: 1.0
+  sensitive_data_patterns:
+    - "password"
+    - "api_key"
+    - "secret"
+    - "token"
+    - "credential"
+    - "ssn"
+    - "credit_card"
+  
+  # RBAC Configuration
+  rbac:
+    enabled: true
+    config_file: "./security/rbac_config.json"
+    audit_log_dir: "./logs/rbac_audit"
+  
+  # Secrets Management
+  secrets:
+    backend: "environment"  # Options: environment, file, azure_keyvault, hashicorp_vault
+    # Pour Azure Key Vault:
+    # vault_url: "https://your-vault.vault.azure.net/"
+    # Pour HashiCorp Vault:
+    # vault_url: "http://localhost:8200"
+    # token: "your-token"
+    # mount_point: "secret"
+
+# Configuration d'alerting
+alerting:
+  enabled: true
+  
+  # Seuils d'alerte
+  alert_thresholds:
+    vulnerability_index: 0.6
+    critical_vulnerabilities: 1
+    high_vulnerabilities: 3
+  
+  # Canaux d'alerte
+  channels:
+    jira:
+      enabled: false
+      jira_url: "${JIRA_URL}"
+      username: "${JIRA_USERNAME}"
+      api_token: "${JIRA_API_TOKEN}"
+      project_key: "${JIRA_PROJECT_KEY}"
+    
+    servicenow:
+      enabled: false
+      instance_url: "${SERVICENOW_URL}"
+      username: "${SERVICENOW_USERNAME}"
+      password: "${SERVICENOW_PASSWORD}"
+      assignment_group: "Security Team"
+    
+    teams:
+      enabled: false
+      webhook_url: "${TEAMS_WEBHOOK_URL}"
+    
+    slack:
+      enabled: false
+      webhook_url: "${SLACK_WEBHOOK_URL}"
+
+# Configuration des runners
+runners:
+  enabled: true
+  max_workers: 3
+  isolation_mode: "container"  # Options: container, vm, process
+  output_dir: "./runner_results"
+  
+  # Configuration Docker
+  docker:
+    image: "llm-security-runner:latest"
+    network: "llm-security-network"
+    memory_limit: "2g"
+    cpu_limit: "2"
+
+# Configuration du scheduling
+scheduling:
+  enabled: false
+  interval: 3600  # Secondes (1 heure)
+  schedule_file: "./config/scan_schedule.json"
+
+# Configuration multi-tenant (Phase 2)
+multi_tenant:
+  enabled: false
+  tenant_isolation: true
+  tenant_config_dir: "./config/tenants"
+
+# Configuration de conformité
+compliance:
+  enabled: true
+  standards:
+    - "ISO27001"
+    - "GDPR"
+    - "SOC2"
+  audit_retention_days: 365
+  
+# Configuration de monitoring
+monitoring:
+  enabled: true
+  prometheus:
+    enabled: false
+    port: 9090
+  metrics:
+    - "vulnerability_index"
+    - "scan_duration"
+    - "test_success_rate"
+    - "vulnerabilities_by_severity"
+
+# Configuration avancée
+advanced:
+  # Chiffrement
+  encryption:
+    at_rest: true
+    in_transit: true
+    algorithm: "AES-256-GCM"
+  
+  # Hash chaining pour logs immuables
+  hash_chaining:
+    enabled: true
+    algorithm: "SHA-256"
+  
+  # Rate limiting
+  rate_limiting:
+    enabled: true
+    requests_per_minute: 60
+    burst: 10
