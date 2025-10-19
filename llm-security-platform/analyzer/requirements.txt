@@ -1,17 +1,13 @@
 # LLM Security Platform - Analyzer Dependencies
-# Core dependencies
-json
-statistics
-pathlib
-datetime
+# Ne pas lister les modules de la stdlib (json, datetime, pathlib, statistics)
 
-# Optional dependencies for enhanced functionality
-matplotlib>=3.6.0  # For generating charts and graphs
-seaborn>=0.12.0    # For statistical visualizations
-pandas>=1.5.0      # For data analysis
-numpy>=1.24.0      # For numerical computations
+# Visualisation et analyse de données
+matplotlib>=3.6.0  # Pour générer des graphiques
+seaborn>=0.12.0    # Visualisations statistiques
+pandas>=1.5.0      # Analyse de données
+numpy>=1.24.0      # Calcul numérique
 
-# Development dependencies (optional)
+# Tests et développement
 pytest>=7.0.0
 pytest-cov>=4.0.0
 black>=22.0.0
