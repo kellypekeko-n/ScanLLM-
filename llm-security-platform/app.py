@@ -14,8 +14,16 @@ import logging
 # Ajouter le chemin pour les imports
 sys.path.insert(0, str(Path(__file__).parent))
 
-from orchestrator.orchestrator import LLMSecurityOrchestrator
-from analyzer.analyzer import LLMSecurityAnalyzer
+# Import lazy pour éviter les erreurs au démarrage
+def get_orchestrator():
+    """Import lazy de l'orchestrateur"""
+    from orchestrator.orchestrator import LLMSecurityOrchestrator
+    return LLMSecurityOrchestrator
+
+def get_analyzer():
+    """Import lazy de l'analyseur"""
+    from analyzer.analyzer import LLMSecurityAnalyzer
+    return LLMSecurityAnalyzer
 
 # Application Insights
 try:
@@ -82,6 +90,7 @@ def health():
 def status():
     """Status de la plateforme"""
     try:
+        LLMSecurityOrchestrator = get_orchestrator()
         orchestrator = LLMSecurityOrchestrator(CONFIG_FILE)
         return jsonify({
             'status': 'operational',
@@ -118,6 +127,8 @@ def scan():
         demo = data.get('demo', False)
         
         # Initialiser l'orchestrateur
+        LLMSecurityOrchestrator = get_orchestrator()
+        LLMSecurityAnalyzer = get_analyzer()
         orchestrator = LLMSecurityOrchestrator(CONFIG_FILE)
         
         # Exécuter le scan (de manière synchrone pour Flask)
@@ -148,6 +159,7 @@ def scan():
 def list_tests():
     """Liste des tests disponibles"""
     try:
+        LLMSecurityOrchestrator = get_orchestrator()
         orchestrator = LLMSecurityOrchestrator(CONFIG_FILE)
         return jsonify({
             'tests': list(orchestrator.test_plugins.keys()),
