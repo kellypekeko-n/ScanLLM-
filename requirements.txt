@@ -1,6 +1,10 @@
 # LLM Security Platform - Root Requirements
 # This file redirects to the actual requirements in llm-security-platform/
 
+# Web Framework
+flask>=3.0.0
+gunicorn>=21.2.0
+
 # Core dependencies
 aiohttp>=3.9.0
 asyncio>=3.4.3
