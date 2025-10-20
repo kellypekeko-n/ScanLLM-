@@ -9,6 +9,7 @@ import asyncio
 import sys
 import os
 from pathlib import Path
+import logging
 
 # Ajouter le chemin pour les imports
 sys.path.insert(0, str(Path(__file__).parent))
@@ -16,10 +17,42 @@ sys.path.insert(0, str(Path(__file__).parent))
 from orchestrator.orchestrator import LLMSecurityOrchestrator
 from analyzer.analyzer import LLMSecurityAnalyzer
 
+# Application Insights
+try:
+    from opencensus.ext.azure.log_exporter import AzureLogHandler
+    from opencensus.ext.azure.trace_exporter import AzureExporter
+    from opencensus.ext.flask.flask_middleware import FlaskMiddleware
+    from opencensus.trace.samplers import ProbabilitySampler
+    
+    APPINSIGHTS_ENABLED = True
+except ImportError:
+    APPINSIGHTS_ENABLED = False
+    print("Application Insights SDK not installed. Monitoring disabled.")
+
 app = Flask(__name__)
 
 # Configuration
 CONFIG_FILE = os.getenv('CONFIG_FILE', 'demo_config.yaml')
+
+# Configure Application Insights
+if APPINSIGHTS_ENABLED:
+    connection_string = os.getenv('APPLICATIONINSIGHTS_CONNECTION_STRING')
+    if connection_string:
+        # Configure tracing
+        middleware = FlaskMiddleware(
+            app,
+            exporter=AzureExporter(connection_string=connection_string),
+            sampler=ProbabilitySampler(rate=1.0)
+        )
+        
+        # Configure logging
+        logger = logging.getLogger(__name__)
+        logger.addHandler(AzureLogHandler(connection_string=connection_string))
+        logger.setLevel(logging.INFO)
+        
+        app.logger.info("Application Insights configured successfully")
+    else:
+        app.logger.warning("APPLICATIONINSIGHTS_CONNECTION_STRING not set")
 
 @app.route('/')
 def home():
