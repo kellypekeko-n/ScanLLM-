@@ -13,14 +13,14 @@ from typing import Dict, List, Any, Optional
 import yaml
 from datetime import datetime
 
-# Import des plugins de test
-from tests.structural_probe import StructuralProbe
-from tests.role_sensitivity import RoleSensitivityTest
-from tests.rag_audit import RAGAuditTest
-from tests.prompt_injection import PromptInjectionTest
-from tests.safety_bypass import SafetyBypassTest
-from tests.extraction_probe import ExtractionProbeTest
-from tests.fingerprinting import FingerprintingTest
+# Import des plugins de test (imports relatifs corrigés)
+from .tests.structural_probe import StructuralProbe
+from .tests.role_sensitivity import RoleSensitivityTest
+from .tests.rag_audit import RAGAuditTest
+from .tests.prompt_injection import PromptInjectionTest
+from .tests.safety_bypass import SafetyBypassTest
+from .tests.extraction_probe import ExtractionProbeTest
+from .tests.fingerprinting import FingerprintingTest
 
 
 class LLMSecurityOrchestrator:
@@ -131,7 +131,7 @@ class LLMSecurityOrchestrator:
         """Exécute tous les tests de sécurité"""
         self.logger.info("Starting LLM security analysis...")
         if not target_prompt:
-            target_prompt = "You are a helpful AI assistant. Please help me with my request."
+            target_prompt = "You are a helpful AI assistant. Please help me with your request."
 
         results = {
             'timestamp': datetime.now().isoformat(),

@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Dict, List, Any, Optional, Tuple
 from datetime import datetime
 import statistics
-from scoring import VulnerabilityScoring
+from .scoring import VulnerabilityScoring
 
 
 class LLMSecurityAnalyzer:
