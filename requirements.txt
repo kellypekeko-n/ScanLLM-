@@ -2,10 +2,10 @@
 # This file redirects to the actual requirements in llm-security-platform/
 
 # Web Framework
-flask>=3.0.0
+flask>=2.3.0,<3.0.0
 gunicorn>=21.2.0
 
-# Monitoring
+# Monitoring (compatible avec Flask 2.x)
 opencensus-ext-azure>=1.1.9
 opencensus-ext-flask>=0.8.0
 opencensus-ext-logging>=0.1.1
