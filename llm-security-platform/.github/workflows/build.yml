@@ -32,13 +32,16 @@ jobs:
     
     - name: Install dependencies
       run: |
+        # Change to llm-security-platform directory
+        cd llm-security-platform
+        
         # Install global dependencies
-        pip install -r requirements.txt
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         
         # Install module dependencies
-        pip install -r orchestrator/requirements.txt
-        pip install -r analyzer/requirements.txt
-        pip install -r runners/requirements.txt
+        if [ -f orchestrator/requirements.txt ]; then pip install -r orchestrator/requirements.txt; fi
+        if [ -f analyzer/requirements.txt ]; then pip install -r analyzer/requirements.txt; fi
+        if [ -f runners/requirements.txt ]; then pip install -r runners/requirements.txt; fi
     
     - name: Verify installation
       run: |
@@ -49,6 +52,7 @@ jobs:
     
     - name: Run tests
       run: |
+        cd llm-security-platform
         python quick_test.py
     
     - name: Upload test results

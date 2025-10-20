@@ -50,8 +50,8 @@ jobs:
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
       with:
-        context: .
-        file: ./runners/Dockerfile
+        context: ./llm-security-platform
+        file: ./llm-security-platform/runners/Dockerfile
         push: ${{ github.event_name != 'pull_request' }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
@@ -61,5 +61,6 @@ jobs:
     - name: Test Docker image
       if: github.event_name == 'pull_request'
       run: |
+        cd llm-security-platform
         docker build -t test-runner -f runners/Dockerfile .
         docker run --rm test-runner python --version
