@@ -13,6 +13,7 @@ import logging
 from datetime import datetime, timedelta
 from collections import defaultdict
 import threading
+from flask_cors import CORS
 
 # Ajouter le chemin pour les imports
 sys.path.insert(0, str(Path(__file__).parent))
@@ -41,6 +42,7 @@ except ImportError:
     print("Application Insights SDK not installed. Monitoring disabled.")
 
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Configuration
 CONFIG_FILE = os.getenv('CONFIG_FILE', 'demo_config.yaml')
