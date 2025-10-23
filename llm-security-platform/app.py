@@ -103,14 +103,25 @@ def home():
     """Page d'accueil"""
     return jsonify({
         'name': 'LLM Security Platform',
-        'version': '1.0.0',
+        'version': '2.0.0',
         'status': 'running',
+        'description': 'Plateforme de scan de securite pour systemes utilisant des LLM',
         'endpoints': {
             '/': 'Home',
             '/health': 'Health check',
             '/api/scan': 'POST - Run security scan',
-            '/api/status': 'GET - Platform status'
-        }
+            '/api/status': 'GET - Platform status',
+            '/api/tests': 'GET - List available tests',
+            '/api/solutions': 'GET - List all solutions',
+            '/api/solutions/<type>': 'GET - Get solutions for vulnerability type'
+        },
+        'features': [
+            '7 security tests',
+            'NIST/CVE/OWASP mapping',
+            'Solutions with code snippets',
+            'Rate limiting protection',
+            'Automated security scanning'
+        ]
     })
 
 @app.route('/health')
@@ -225,6 +236,59 @@ def list_tests():
             'tests': list(orchestrator.test_plugins.keys()),
             'count': len(orchestrator.test_plugins)
         })
+    except Exception as e:
+        return jsonify({
+            'error': str(e)
+        }), 500
+
+@app.route('/api/solutions/<vulnerability_type>')
+def get_solutions(vulnerability_type):
+    """Recupere les solutions pour un type de vulnerabilite"""
+    # Rate Limiting: 100 requetes par heure par IP
+    client_ip = request.remote_addr or 'unknown'
+    if not rate_limiter.is_allowed(f"solutions_{client_ip}", 100, 3600):
+        return jsonify({'error': 'Rate limit exceeded'}), 429
+    
+    try:
+        from data.solutions_database import get_solution
+        solution = get_solution(vulnerability_type)
+        
+        if not solution:
+            return jsonify({
+                'error': 'Solution not found',
+                'available_types': ['prompt_injection', 'data_leakage', 'no_rate_limiting']
+            }), 404
+        
+        return jsonify(solution)
+    except Exception as e:
+        return jsonify({
+            'error': str(e)
+        }), 500
+
+@app.route('/api/solutions')
+def list_solutions():
+    """Liste toutes les solutions disponibles"""
+    # Rate Limiting: 100 requetes par heure par IP
+    client_ip = request.remote_addr or 'unknown'
+    if not rate_limiter.is_allowed(f"solutions_list_{client_ip}", 100, 3600):
+        return jsonify({'error': 'Rate limit exceeded'}), 429
+    
+    try:
+        from data.solutions_database import get_all_solutions
+        solutions = get_all_solutions()
+        
+        # Retourner seulement les metadonnees (pas les solutions completes)
+        summary = {}
+        for vuln_type, data in solutions.items():
+            summary[vuln_type] = {
+                'name': data['name'],
+                'severity': data['severity'],
+                'cwe': data['cwe'],
+                'owasp': data['owasp'],
+                'solutions_count': len(data['solutions'])
+            }
+        
+        return jsonify(summary)
     except Exception as e:
         return jsonify({
             'error': str(e)
