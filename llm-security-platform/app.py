@@ -113,7 +113,8 @@ def home():
             '/api/status': 'GET - Platform status',
             '/api/tests': 'GET - List available tests',
             '/api/solutions': 'GET - List all solutions',
-            '/api/solutions/<type>': 'GET - Get solutions for vulnerability type'
+            '/api/solutions/<type>': 'GET - Get solutions for vulnerability type',
+            '/api/export/csv': 'POST - Export scan results to CSV'
         },
         'features': [
             '7 security tests',
@@ -289,6 +290,43 @@ def list_solutions():
             }
         
         return jsonify(summary)
+    except Exception as e:
+        return jsonify({
+            'error': str(e)
+        }), 500
+
+@app.route('/api/export/csv', methods=['POST'])
+def export_csv():
+    """Exporte les resultats de scan en CSV"""
+    # Rate Limiting: 50 requetes par heure par IP
+    client_ip = request.remote_addr or 'unknown'
+    if not rate_limiter.is_allowed(f"export_{client_ip}", 50, 3600):
+        return jsonify({'error': 'Rate limit exceeded'}), 429
+    
+    try:
+        from analyzer.csv_exporter import export_scan_to_csv
+        from flask import make_response
+        
+        data = request.get_json()
+        
+        if not data or 'scan_results' not in data:
+            return jsonify({
+                'error': 'Missing required field: scan_results'
+            }), 400
+        
+        scan_results = data['scan_results']
+        system_name = data.get('system_name', 'Unknown System')
+        scan_id = data.get('scan_id', None)
+        
+        # Generer le CSV
+        csv_content = export_scan_to_csv(scan_results, system_name, scan_id)
+        
+        # Creer la reponse avec le CSV
+        response = make_response(csv_content)
+        response.headers['Content-Type'] = 'text/csv'
+        response.headers['Content-Disposition'] = f'attachment; filename=scan_report_{scan_id or "latest"}.csv'
+        
+        return response
     except Exception as e:
         return jsonify({
             'error': str(e)
