@@ -31,6 +31,39 @@ jobs:
           python -m venv antenv
           source antenv/bin/activate
           pip install -r requirements.txt
+      
+      # 1. Tests Automatiques
+      - name: Run linting with flake8
+        run: |
+          source antenv/bin/activate
+          pip install flake8
+          flake8 llm-security-platform --count --select=E9,F63,F7,F82 --show-source --statistics --max-line-length=120
+        continue-on-error: true
+      
+      - name: Run basic tests
+        run: |
+          source antenv/bin/activate
+          pip install pytest
+          cd llm-security-platform
+          python -c "from app import app; print('Flask app imports successfully')"
+          python -c "from orchestrator.orchestrator import LLMSecurityOrchestrator; print('Orchestrator imports successfully')"
+          python -c "from analyzer.analyzer import LLMSecurityAnalyzer; print('Analyzer imports successfully')"
+      
+      # 2. Scan de Securite
+      - name: Security scan with Bandit
+        run: |
+          source antenv/bin/activate
+          pip install bandit
+          bandit -r llm-security-platform -f json -o security-report.json || true
+          bandit -r llm-security-platform -f txt
+        continue-on-error: true
+      
+      - name: Dependency security check
+        run: |
+          source antenv/bin/activate
+          pip install safety
+          safety check --json || true
+        continue-on-error: true
                 
       # By default, when you enable GitHub CI/CD integration through the Azure portal, the platform automatically sets the SCM_DO_BUILD_DURING_DEPLOYMENT application setting to true. This triggers the use of Oryx, a build engine that handles application compilation and dependency installation (e.g., pip install) directly on the platform during deployment. Hence, we exclude the antenv virtual environment directory from the deployment artifact to reduce the payload size. 
       - name: Upload artifact for deployment jobs
@@ -73,4 +106,19 @@ jobs:
         with:
           app-name: 'LLm-security-plateform'
           slot-name: 'Production'
+      
+      # 3. Notifications
+      - name: Notify deployment success
+        if: success()
+        run: |
+          echo "Deployment successful!"
+          echo "Application URL: https://llm-security-plateform.azurewebsites.net"
+          echo "Deployed at: $(date)"
+      
+      - name: Notify deployment failure
+        if: failure()
+        run: |
+          echo "Deployment failed!"
+          echo "Please check the logs for details."
+          echo "Failed at: $(date)"
           
