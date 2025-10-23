@@ -10,6 +10,9 @@ import sys
 import os
 from pathlib import Path
 import logging
+from datetime import datetime, timedelta
+from collections import defaultdict
+import threading
 
 # Ajouter le chemin pour les imports
 sys.path.insert(0, str(Path(__file__).parent))
@@ -41,6 +44,39 @@ app = Flask(__name__)
 
 # Configuration
 CONFIG_FILE = os.getenv('CONFIG_FILE', 'demo_config.yaml')
+
+# Rate Limiting Configuration
+class RateLimiter:
+    def __init__(self):
+        self.requests = defaultdict(list)
+        self.lock = threading.Lock()
+    
+    def is_allowed(self, key, max_requests, time_window_seconds):
+        """Verifie si la requete est autorisee"""
+        with self.lock:
+            now = datetime.now()
+            cutoff = now - timedelta(seconds=time_window_seconds)
+            
+            # Nettoyer les anciennes requetes
+            self.requests[key] = [req_time for req_time in self.requests[key] if req_time > cutoff]
+            
+            # Verifier la limite
+            if len(self.requests[key]) >= max_requests:
+                return False
+            
+            # Ajouter la nouvelle requete
+            self.requests[key].append(now)
+            return True
+    
+    def get_remaining(self, key, max_requests, time_window_seconds):
+        """Retourne le nombre de requetes restantes"""
+        with self.lock:
+            now = datetime.now()
+            cutoff = now - timedelta(seconds=time_window_seconds)
+            self.requests[key] = [req_time for req_time in self.requests[key] if req_time > cutoff]
+            return max(0, max_requests - len(self.requests[key]))
+
+rate_limiter = RateLimiter()
 
 # Configure Application Insights
 if APPINSIGHTS_ENABLED:
@@ -89,6 +125,11 @@ def health():
 @app.route('/api/status')
 def status():
     """Status de la plateforme"""
+    # Rate Limiting: 100 requetes par heure par IP
+    client_ip = request.remote_addr or 'unknown'
+    if not rate_limiter.is_allowed(f"status_{client_ip}", 100, 3600):
+        return jsonify({'error': 'Rate limit exceeded'}), 429
+    
     try:
         LLMSecurityOrchestrator = get_orchestrator()
         orchestrator = LLMSecurityOrchestrator(CONFIG_FILE)
@@ -115,6 +156,20 @@ def scan():
         "demo": true
     }
     """
+    # Rate Limiting: 10 scans par heure par IP
+    client_ip = request.remote_addr or 'unknown'
+    max_requests = 10
+    time_window = 3600  # 1 heure en secondes
+    
+    if not rate_limiter.is_allowed(f"scan_{client_ip}", max_requests, time_window):
+        remaining = rate_limiter.get_remaining(f"scan_{client_ip}", max_requests, time_window)
+        return jsonify({
+            'error': 'Rate limit exceeded',
+            'message': f'Maximum {max_requests} scans per hour. Please try again later.',
+            'remaining': remaining,
+            'retry_after': time_window
+        }), 429
+    
     try:
         data = request.get_json()
         
@@ -158,6 +213,11 @@ def scan():
 @app.route('/api/tests')
 def list_tests():
     """Liste des tests disponibles"""
+    # Rate Limiting: 100 requetes par heure par IP
+    client_ip = request.remote_addr or 'unknown'
+    if not rate_limiter.is_allowed(f"tests_{client_ip}", 100, 3600):
+        return jsonify({'error': 'Rate limit exceeded'}), 429
+    
     try:
         LLMSecurityOrchestrator = get_orchestrator()
         orchestrator = LLMSecurityOrchestrator(CONFIG_FILE)

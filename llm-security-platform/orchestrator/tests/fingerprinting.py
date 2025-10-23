@@ -324,7 +324,8 @@ class FingerprintingTest:
         
         # Crée une signature du pattern
         pattern_str = json.dumps(pattern_features, sort_keys=True)
-        return hashlib.md5(pattern_str.encode()).hexdigest()[:8]
+        # Utilisation de SHA256 au lieu de MD5 pour la securite
+        return hashlib.sha256(pattern_str.encode()).hexdigest()[:8]
     
     def _analyze_fingerprinting_vulnerabilities(self, consistency_score: float,
                                                temporal_score: float,

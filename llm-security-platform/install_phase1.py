@@ -24,9 +24,15 @@ def print_step(step_num, total_steps, description):
 def run_command(command, description, check=True):
     """Exécute une commande shell"""
     try:
+        # Convertir la commande en liste si c'est une chaine
+        if isinstance(command, str):
+            command_list = command.split()
+        else:
+            command_list = command
+        
         result = subprocess.run(
-            command,
-            shell=True,
+            command_list,
+            shell=False,  # Securite: Eviter shell=True
             check=check,
             capture_output=True,
             text=True
