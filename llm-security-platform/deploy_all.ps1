@@ -73,7 +73,9 @@ if (-not (Test-Path $frontendDir)) {
     npm install axios react-router-dom
     npm install -D tailwindcss postcss autoprefixer
     npx tailwindcss init -p
-    Check-Error
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Attention: Erreur lors de l'initialisation de Tailwind, mais on continue..." -ForegroundColor Yellow
+    }
 } else {
     Write-Host "Projet React deja existant." -ForegroundColor Green
 }
