@@ -84,6 +84,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: backend-src
+          path: .
+
+      - name: List workspace (debug)
+        run: |
+          ls -la
+          ls -la llm-security-platform || true
 
       - name: Azure login
         uses: azure/login@v2
@@ -97,7 +103,7 @@ jobs:
         with:
           app-name: 'LLm-security-plateform'
           slot-name: 'Production'
-          package: 'backend-src/llm-security-platform'
+          package: 'llm-security-platform'
 
       - name: Configure startup and settings
         run: |
