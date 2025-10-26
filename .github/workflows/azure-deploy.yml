@@ -24,6 +24,23 @@ jobs:
           source venv/bin/activate
           pip install -r requirements.txt
 
+      - name: Security scan with Bandit
+        run: |
+          source llm-security-platform/venv/bin/activate
+          pip install bandit safety
+          bandit -r llm-security-platform -f json -o bandit-report.json || true
+          bandit -r llm-security-platform -f txt || true
+          safety check --full-report --output json > safety-report.json || true
+        continue-on-error: true
+
+      - name: Upload security reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: |
+            bandit-report.json
+            safety-report.json
+
       - name: Upload backend artifact
         uses: actions/upload-artifact@v4
         with:
@@ -45,6 +62,7 @@ jobs:
         working-directory: llm-security-platform/frontend
         env:
           REACT_APP_API_URL: https://llm-security-plateform.azurewebsites.net
+          CI: false
         run: |
           npm ci
           npm run build
