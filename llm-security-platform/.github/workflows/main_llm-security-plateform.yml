@@ -32,6 +32,32 @@ jobs:
           source antenv/bin/activate
           # Install backend dependencies (includes submodules via -r ...)
           pip install -r llm-security-platform/requirements.txt
+      
+      # Security scan with Bandit (does not fail pipeline by default)
+      - name: Security scan with Bandit
+        run: |
+          source antenv/bin/activate
+          pip install bandit
+          bandit -r llm-security-platform -f json -o bandit-report.json || true
+          bandit -r llm-security-platform -f txt || true
+        continue-on-error: true
+      
+      # Dependency security check with Safety (optional)
+      - name: Dependency security check (Safety)
+        run: |
+          source antenv/bin/activate
+          pip install safety
+          safety check --full-report --output json > safety-report.json || true
+        continue-on-error: true
+      
+      # Upload security reports
+      - name: Upload security reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: |
+            bandit-report.json
+            safety-report.json
                 
       # By default, when you enable GitHub CI/CD integration through the Azure portal, the platform automatically sets the SCM_DO_BUILD_DURING_DEPLOYMENT application setting to true.
       - name: Upload artifact for deployment jobs
