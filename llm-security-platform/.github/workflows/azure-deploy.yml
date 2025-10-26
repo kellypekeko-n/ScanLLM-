@@ -53,8 +53,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frontend-build
-          path: |
-            llm-security-platform/frontend/build/**
+          path: llm-security-platform/frontend/build
 
   deploy_backend:
     runs-on: ubuntu-latest
@@ -109,6 +108,5 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
           action: "upload"
-          app_location: "llm-security-platform/frontend"
-          output_location: "llm-security-platform/frontend/build"
+          app_location: "llm-security-platform/frontend/build"
           skip_app_build: true
