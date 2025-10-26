@@ -97,7 +97,7 @@ jobs:
         with:
           app-name: 'LLm-security-plateform'
           slot-name: 'Production'
-          package: 'llm-security-platform'
+          package: 'backend-src/llm-security-platform'
 
       - name: Configure startup and settings
         run: |
