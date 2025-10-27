@@ -128,20 +128,8 @@ jobs:
             -n LLm-security-plateform \
             --settings SCM_DO_BUILD_DURING_DEPLOYMENT=true
 
-          # Enable Always On only if plan supports it
-          PLAN_ID=$(az webapp show -g "$RESOURCE_GROUP" -n LLm-security-plateform --query serverFarmId -o tsv)
-          PLAN_RG=$(echo "$PLAN_ID" | awk -F/ '{for(i=1;i<=NF;i++){if($i=="resourceGroups"){print $(i+1);break}}}')
-          PLAN_NAME=$(echo "$PLAN_ID" | awk -F/ '{print $NF}')
-          SKU_TIER=$(az resource show -g "$PLAN_RG" -n "$PLAN_NAME" --resource-type Microsoft.Web/serverfarms --query sku.tier -o tsv)
-          case "$SKU_TIER" in
-            Basic|Standard|Premium|PremiumV2|PremiumV3|Isolated)
-              echo "Enabling Always On on plan tier: $SKU_TIER"
-              az webapp config set -g "$RESOURCE_GROUP" -n LLm-security-plateform --always-on true || echo "Skip: Always On set returned non-fatal error"
-              ;;
-            *)
-              echo "Skip Always On: plan tier '$SKU_TIER' does not support it"
-              ;;
-          esac
+          # Best-effort Always On (will be ignored if plan does not support or RBAC denies)
+          az webapp config set -g "$RESOURCE_GROUP" -n LLm-security-plateform --always-on true || echo "Skipping Always On (plan not supported or insufficient permissions)"
 
   deploy_frontend:
     runs-on: ubuntu-latest
