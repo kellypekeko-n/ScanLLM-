@@ -46,7 +46,7 @@ jobs:
           (cd llm-security-platform && zip -r ../backend.zip . \
             -x "**/venv/**" "**/.venv/**" "**/__pycache__/**" \
                "frontend/**" "**/frontend/**" "**/node_modules/**" \
-               "*.log" ".env" ".env.*")
+               "*.log" ".env" ".env.*" "config/scan_schedule.json")
 
       - name: Upload backend package
         uses: actions/upload-artifact@v4
@@ -129,7 +129,7 @@ jobs:
           az webapp config appsettings set \
             -g "$RESOURCE_GROUP" \
             -n LLm-security-plateform \
-            --settings SCM_DO_BUILD_DURING_DEPLOYMENT=true WEBSITES_PORT=8000
+            --settings SCM_DO_BUILD_DURING_DEPLOYMENT=true WEBSITES_PORT=8000 ORYX_BUILD_PLATFORM=python ORYX_BUILD_PLATFORM_VERSION=3.11
 
           # Configure health check path for warmup and probe
           az webapp update -g "$RESOURCE_GROUP" -n LLm-security-plateform --set siteConfig.healthCheckPath='/health'
