@@ -109,12 +109,20 @@ jobs:
           slot-name: 'Production'
           package: 'backend.zip'
 
+      - name: Validate Azure resource group secret
+        if: ${{ secrets.AZURE_RESOURCE_GROUP == '' }}
+        run: |
+          echo "ERROR: Secret AZURE_RESOURCE_GROUP is missing. Set it in GitHub repository settings > Secrets and variables > Actions." 1>&2
+          exit 1
+
       - name: Configure startup and settings
+        if: ${{ secrets.AZURE_RESOURCE_GROUP != '' }}
         run: |
           az webapp config set \
             -g ${{ secrets.AZURE_RESOURCE_GROUP }} \
             -n LLm-security-plateform \
-            --startup-file "gunicorn --bind=0.0.0.0:$PORT app:app"
+            --startup-file "gunicorn --bind=0.0.0.0:$PORT app:app" \
+            --always-on true
           az webapp config appsettings set \
             -g ${{ secrets.AZURE_RESOURCE_GROUP }} \
             -n LLm-security-plateform \
