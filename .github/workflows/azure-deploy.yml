@@ -43,7 +43,7 @@ jobs:
 
       - name: Package backend
         run: |
-          zip -r backend.zip llm-security-platform -x "**/venv/**" "**/.venv/**" "**/__pycache__/**"
+          (cd llm-security-platform && zip -r ../backend.zip . -x "**/venv/**" "**/.venv/**" "**/__pycache__/**")
 
       - name: Upload backend package
         uses: actions/upload-artifact@v4
@@ -116,17 +116,17 @@ jobs:
           az webapp config set \
             -g "$RESOURCE_GROUP" \
             -n LLm-security-plateform \
-            --startup-file "gunicorn --chdir llm-security-platform --bind=0.0.0.0:8000 app:app" || \
+            --startup-file "gunicorn --bind=0.0.0.0:8000 app:app" || \
           az webapp config set \
             -g "$RESOURCE_GROUP" \
             -n LLm-security-plateform \
-            --startup-file "gunicorn --chdir llm-security-platform --bind=0.0.0.0:8000 app:app"
+            --startup-file "gunicorn --bind=0.0.0.0:8000 app:app"
 
           # Ensure Oryx build runs on platform
           az webapp config appsettings set \
             -g "$RESOURCE_GROUP" \
             -n LLm-security-plateform \
-            --settings SCM_DO_BUILD_DURING_DEPLOYMENT=true WEBSITES_PORT=8000 PYTHONPATH=/home/site/wwwroot/llm-security-platform
+            --settings SCM_DO_BUILD_DURING_DEPLOYMENT=true WEBSITES_PORT=8000
 
           # Configure health check path for warmup and probe
           az webapp update -g "$RESOURCE_GROUP" -n LLm-security-plateform --set siteConfig.healthCheckPath='/health'
