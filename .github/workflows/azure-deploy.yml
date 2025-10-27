@@ -41,12 +41,15 @@ jobs:
             bandit-report.json
             safety-report.json
 
-      - name: Upload backend artifact
+      - name: Package backend
+        run: |
+          zip -r backend.zip llm-security-platform -x "**/venv/**" "**/.venv/**" "**/__pycache__/**"
+
+      - name: Upload backend package
         uses: actions/upload-artifact@v4
         with:
-          name: backend-src
-          path: |
-            llm-security-platform/**
+          name: backend-package
+          path: backend.zip
 
   build_frontend:
     runs-on: ubuntu-latest
@@ -80,16 +83,17 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - name: Download backend artifact
+      - name: Download backend package
         uses: actions/download-artifact@v4
         with:
-          name: backend-src
+          name: backend-package
           path: .
 
       - name: List workspace (debug)
         run: |
           ls -la
           ls -la llm-security-platform || true
+          ls -la backend.zip || true
 
       - name: Azure login
         uses: azure/login@v2
@@ -103,7 +107,7 @@ jobs:
         with:
           app-name: 'LLm-security-plateform'
           slot-name: 'Production'
-          package: 'llm-security-platform'
+          package: 'backend.zip'
 
       - name: Configure startup and settings
         run: |
