@@ -111,11 +111,7 @@ jobs:
 
       - name: Configure startup and settings
         run: |
-          RESOURCE_GROUP=$(az webapp list --query "[?name=='LLm-security-plateform'].resourceGroup | [0]" -o tsv)
-          if [ -z "$RESOURCE_GROUP" ]; then
-            echo "ERROR: Could not resolve Resource Group for app LLm-security-plateform" 1>&2
-            exit 1
-          fi
+          RESOURCE_GROUP="LLM-Security-RG"
           az webapp config set \
             -g "$RESOURCE_GROUP" \
             -n LLm-security-plateform \
