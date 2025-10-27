@@ -43,7 +43,10 @@ jobs:
 
       - name: Package backend
         run: |
-          (cd llm-security-platform && zip -r ../backend.zip . -x "**/venv/**" "**/.venv/**" "**/__pycache__/**")
+          (cd llm-security-platform && zip -r ../backend.zip . \
+            -x "**/venv/**" "**/.venv/**" "**/__pycache__/**" \
+               "frontend/**" "**/frontend/**" "**/node_modules/**" \
+               "*.log" ".env" ".env.*")
 
       - name: Upload backend package
         uses: actions/upload-artifact@v4
