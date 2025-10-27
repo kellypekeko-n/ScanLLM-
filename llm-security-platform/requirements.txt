@@ -7,6 +7,11 @@ asyncio>=3.4.3
 pyyaml>=6.0
 requests>=2.31.0
 
+# Web API
+Flask>=2.3.0
+flask-cors>=4.0.0
+gunicorn>=21.2.0
+
 # Data processing
 pandas>=2.1.0
 numpy>=1.24.0
@@ -36,7 +41,7 @@ bandit>=1.7.5
 # Monitoring (optional)
 # prometheus-client>=0.19.0
 
-# Note: Installer également les requirements des sous-modules:
-# pip install -r orchestrator/requirements.txt
-# pip install -r analyzer/requirements.txt
-# pip install -r runners/requirements.txt
+# Inclure aussi les dépendances des sous-modules au moment du déploiement
+-r orchestrator/requirements.txt
+-r analyzer/requirements.txt
+-r runners/requirements.txt
