@@ -1,12 +1,10 @@
 /**
- * Home Page
- * Page d'accueil de la plateforme
+ * Home Page - Minimal Trivy-style design
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import apiService from '../services/api';
-import LoadingSpinner from '../components/LoadingSpinner';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const Home = () => {
   const [platformInfo, setPlatformInfo] = useState(null);
@@ -38,7 +36,7 @@ const Home = () => {
     setScanError(null);
     setScanData(null);
     if (!softwareName) {
-      setScanError("Le nom du système est requis");
+      setScanError('Le nom du système est requis');
       return;
     }
     setScanning(true);
@@ -46,9 +44,8 @@ const Home = () => {
       const resp = await apiService.runSoftwareScan({ name: softwareName, base_url: baseUrl });
       if (resp && resp.scan_id) {
         setScanId(resp.scan_id);
-        // Polling
         let attempts = 0;
-        const maxAttempts = 40; // ~2 minutes si 3s intervalle
+        const maxAttempts = 40;
         const wait = (ms) => new Promise((res) => setTimeout(res, ms));
         while (attempts < maxAttempts) {
           await wait(3000);
@@ -63,7 +60,7 @@ const Home = () => {
           setScanError("Le scan prend plus de temps que prévu. Réessayez plus tard.");
         }
       } else {
-        setScanError("Réponse invalide du serveur");
+        setScanError('Réponse invalide du serveur');
       }
     } catch (err) {
       setScanError(err?.response?.data?.error || err.message || 'Erreur lors du lancement du scan');
@@ -122,6 +119,7 @@ const Home = () => {
             Voir les Solutions
           </Link>
         </div>
+      </div>
 
       {/* Modes de test */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
@@ -172,7 +170,6 @@ const Home = () => {
             </button>
           </form>
 
-          {/* Résumé résultats */}
           {scanData && scanData.status === 'completed' && (
             <div className="mt-6 border-t pt-4">
               <h4 className="font-bold text-gray-900 mb-2">Résultats</h4>
@@ -193,7 +190,6 @@ const Home = () => {
             <div className="mt-6 text-red-600">Erreur: {scanData.error}</div>
           )}
         </div>
-      </div>
       </div>
 
       {/* Features */}

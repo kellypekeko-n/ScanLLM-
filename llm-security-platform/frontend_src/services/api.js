@@ -82,6 +82,32 @@ export const apiService = {
     const response = await api.get('/');
     return response.data;
   },
+
+  // Export scan results to CSV
+  async exportCsv(scanResults, systemName = 'Unknown System', scanId = null) {
+    const response = await api.post(
+      '/api/export/csv',
+      {
+        scan_results: scanResults,
+        system_name: systemName,
+        scan_id: scanId,
+      },
+      { responseType: 'blob' }
+    );
+    return response;
+  },
+
+  // Run software scan (async) - POST /api/scan/software
+  async runSoftwareScan(payload) {
+    const response = await api.post('/api/scan/software', payload);
+    return response.data;
+  },
+
+  // Get scan status/results - GET /api/scan/<scan_id>
+  async getScanStatus(scanId) {
+    const response = await api.get(`/api/scan/${scanId}`);
+    return response.data;
+  },
 };
 
 export default apiService;

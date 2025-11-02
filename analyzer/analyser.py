@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+
 """
 Analyzer - lit les JSON results du dossier RESULTS_DIR et calcule un VulnerabilityIndex
 par modèle, en agrégeant les métriques renvoyées par les plugins.

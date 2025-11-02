@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
+import apiService from '../services/api';
 
 const ScanResults = ({ results, systemName }) => {
   if (!results || !results.analysis) {
@@ -261,6 +262,28 @@ const ScanResults = ({ results, systemName }) => {
           Imprimer le Rapport
         </button>
         <button
+          onClick={async () => {
+            try {
+              const resp = await apiService.exportCsv(
+                results?.scan_results || results,
+                systemName || 'Unknown System',
+                results?.scan_results?.scan_id || null
+              );
+              const blob = new Blob([resp.data], { type: 'text/csv;charset=utf-8;' });
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              const ts = analysis?.timestamp ? new Date(analysis.timestamp).toISOString().replace(/[:.]/g, '-') : 'latest';
+              a.download = `scan_report_${ts}.csv`;
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+              window.URL.revokeObjectURL(url);
+            } catch (e) {
+              console.error('CSV download failed', e);
+              alert("Echec du telechargement CSV. Verifiez la connexion a l'API.");
+            }
+          }}
           className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
         >
           Telecharger CSV
