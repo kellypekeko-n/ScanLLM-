@@ -41,25 +41,17 @@ const NewScan = () => {
       {/* Resultats (si disponibles) */}
       {scanResults && (
         <div className="mb-8">
-          <ScanResults results={scanResults} systemName={systemName} />
+          <ScanResults 
+            results={scanResults} 
+            systemName={systemName}
+            onNewScan={() => setScanResults(null)}
+          />
         </div>
       )}
 
       {/* Formulaire de scan */}
       {!scanResults && (
         <ScanForm onScanComplete={handleScanComplete} />
-      )}
-
-      {/* Bouton pour nouveau scan si resultats affiches */}
-      {scanResults && (
-        <div className="mt-8 text-center">
-          <button
-            onClick={() => setScanResults(null)}
-            className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 font-medium"
-          >
-            Lancer un Nouveau Scan
-          </button>
-        </div>
       )}
     </div>
   );

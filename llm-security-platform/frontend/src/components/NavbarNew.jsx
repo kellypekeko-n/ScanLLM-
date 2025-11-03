@@ -54,6 +54,9 @@ const Navbar = () => {
             <Link to="/history" className={navLinkClass('/history')}>
               {t('history')}
             </Link>
+            <Link to="/solutions" className={navLinkClass('/solutions')}>
+              Solutions
+            </Link>
             <Link to="/about" className={navLinkClass('/about')}>
               {t('about')}
             </Link>

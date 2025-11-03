@@ -28,6 +28,26 @@ const Solutions = () => {
           // Charger les solutions pour un type specifique
           const data = await apiService.getSolutions(vulnerabilityType);
           setSolutionData(data);
+          
+          // Sauvegarder dans l'historique des solutions consultées
+          const solutionEntry = {
+            type: vulnerabilityType,
+            description: vulnerability?.description || data?.description,
+            viewedAt: new Date().toISOString(),
+          };
+          
+          const existingSolutions = JSON.parse(localStorage.getItem('viewedSolutions') || '[]');
+          
+          // Éviter les doublons (même type)
+          const filtered = existingSolutions.filter(s => s.type !== vulnerabilityType);
+          filtered.unshift(solutionEntry);
+          
+          // Limiter à 20 solutions
+          if (filtered.length > 20) {
+            filtered.pop();
+          }
+          
+          localStorage.setItem('viewedSolutions', JSON.stringify(filtered));
         } else {
           // Charger toutes les solutions
           const data = await apiService.listSolutions();
@@ -41,7 +61,7 @@ const Solutions = () => {
     };
 
     fetchSolutions();
-  }, [vulnerabilityType]);
+  }, [vulnerabilityType, vulnerability]);
 
   if (loading) {
     return <LoadingSpinner message="Chargement des solutions..." />;

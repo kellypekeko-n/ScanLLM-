@@ -6,7 +6,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
-import apiService from '../services/api';
+import { scanSystem } from '../services/systemScanService';
+import SystemScanResults from '../components/SystemScanResults';
 
 const ScanSystem = () => {
   const { t } = useLanguage();
@@ -20,6 +21,7 @@ const ScanSystem = () => {
   });
   const [scanning, setScanning] = useState(false);
   const [error, setError] = useState(null);
+  const [scanResults, setScanResults] = useState(null);
 
   const handleChange = (e) => {
     setFormData({
@@ -39,17 +41,41 @@ const ScanSystem = () => {
 
     setScanning(true);
     try {
-      const resp = await apiService.runSoftwareScan({
+      // Lancer le scan système (Trivy-style)
+      const result = await scanSystem({
         name: formData.name,
         base_url: formData.endpoint,
         model: formData.model,
         api_key: formData.apiKey,
       });
       
-      if (resp && resp.scan_id) {
-        // Redirect to results page or show polling UI
-        navigate(`/scan-results/${resp.scan_id}`);
+      // Afficher les résultats
+      setScanResults(result);
+      
+      // Sauvegarder dans l'historique
+      const scanEntry = {
+        id: result.scan_id,
+        name: result.system_name,
+        endpoint: result.endpoint,
+        model: result.model,
+        date: result.scan_date,
+        status: 'completed',
+        type: 'system',
+        vulnerabilities: result.summary.total_vulnerabilities,
+        results: result,
+      };
+      
+      const existingHistory = JSON.parse(localStorage.getItem('scanHistory') || '[]');
+      existingHistory.unshift(scanEntry);
+      
+      if (existingHistory.length > 50) {
+        existingHistory.pop();
       }
+      
+      localStorage.setItem('scanHistory', JSON.stringify(existingHistory));
+      
+      // Scroll vers les résultats
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
       setError(err?.response?.data?.error || err.message || 'Error launching scan');
     } finally {
@@ -59,7 +85,17 @@ const ScanSystem = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-blue-900 to-gray-900 py-12">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Résultats du scan (si disponibles) */}
+        {scanResults && (
+          <div className="mb-8">
+            <SystemScanResults results={scanResults} />
+          </div>
+        )}
+
+        {/* Formulaire de scan (caché si résultats affichés) */}
+        {!scanResults && (
+        <div className="max-w-3xl mx-auto">
         <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-8">
           <h1 className="text-3xl font-bold text-white mb-2">
             {t('scanSystemTitle')}
@@ -159,6 +195,8 @@ const ScanSystem = () => {
             </div>
           </form>
         </div>
+        </div>
+        )}
       </div>
     </div>
   );

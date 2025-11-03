@@ -139,7 +139,7 @@ const Home = () => {
 
         {/* Scanner un système */}
         <div className="bg-white p-6 rounded-lg shadow-lg">
-          <h3 className="text-xl font-bold text-gray-900 mb-2">Scanner un Système (type Trivy)</h3>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">Scanner un Système </h3>
           <p className="text-gray-600 mb-4">Entrez le nom du système et (optionnel) l’endpoint. Le scan est asynchrone.</p>
           <form onSubmit={startSoftwareScan} className="space-y-3">
             <div>
@@ -153,7 +153,7 @@ const Home = () => {
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-700 mb-1">Endpoint (optionnel)</label>
+              <label className="block text-sm text-gray-700 mb-1">Endpoint</label>
               <input
                 type="url"
                 className="w-full border rounded-lg px-3 py-2"

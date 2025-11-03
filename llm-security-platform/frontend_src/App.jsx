@@ -21,7 +21,7 @@ function App() {
             <Route path="/scan" element={<NewScan />} />
             <Route path="/solutions" element={<Solutions />} />
             <Route path="/solutions/:vulnerabilityType" element={<Solutions />} />
-            <Route path="/dashboard" element={<div className="max-w-7xl mx-auto px-4 py-12"><h1 className="text-3xl font-bold">Dashboard (Coming Soon)</h1></div>} />
+            <Route path="/dashboard" element={<div className="max-w-7xl mx-auto px-4 py-12"><h1 className="text-3xl font-bold">Dashboard </h1></div>} />
           </Routes>
         </main>
 

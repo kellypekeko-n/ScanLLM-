@@ -56,6 +56,29 @@ const ScanForm = ({ onScanComplete }) => {
       // Lancer le scan
       const result = await apiService.runScan(formData.prompt, formData.demo);
       
+      // Sauvegarder dans l'historique
+      const scanEntry = {
+        id: Date.now().toString(),
+        name: formData.systemName || 'Unnamed Scan',
+        date: new Date().toISOString(),
+        status: 'completed',
+        score: result.analysis?.overall_security_score || 0,
+        vulnerabilities: result.analysis?.vulnerabilities?.length || 0,
+        results: result,
+      };
+      
+      // Récupérer l'historique existant
+      const existingHistory = JSON.parse(localStorage.getItem('scanHistory') || '[]');
+      existingHistory.unshift(scanEntry); // Ajouter au début
+      
+      // Limiter à 50 scans
+      if (existingHistory.length > 50) {
+        existingHistory.pop();
+      }
+      
+      // Sauvegarder
+      localStorage.setItem('scanHistory', JSON.stringify(existingHistory));
+      
       // Callback avec les resultats
       if (onScanComplete) {
         onScanComplete(result, formData.systemName);

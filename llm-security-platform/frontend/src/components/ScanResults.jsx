@@ -4,9 +4,14 @@
  */
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import apiService from '../services/api';
+import FeedbackForm from './FeedbackForm';
+import ComplianceReport from './ComplianceReport';
+import { downloadPDF } from '../services/pdfExportService';
 
-const ScanResults = ({ results, systemName }) => {
+const ScanResults = ({ results, systemName, scanId, onNewScan }) => {
+  const navigate = useNavigate();
   if (!results || !results.analysis) {
     return null;
   }
@@ -253,24 +258,62 @@ const ScanResults = ({ results, systemName }) => {
       )}
 
       {/* Actions */}
-      <div className="flex space-x-4">
+      <div className="flex flex-wrap gap-4">
         <button
-          onClick={() => window.print()}
-          className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+          onClick={() => downloadPDF(results, systemName, scanId)}
+          className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
         >
-          Imprimer le Rapport
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+          </svg>
+          Télécharger PDF
         </button>
         <button
+          onClick={async () => {
+            try {
+              const resp = await apiService.exportCsv(results, systemName, scanId);
+              const blob = new Blob([resp.data], { type: 'text/csv;charset=utf-8;' });
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `scan_report_${scanId || Date.now()}.csv`;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              window.URL.revokeObjectURL(url);
+            } catch (error) {
+              console.error('Erreur téléchargement CSV:', error);
+              alert('Erreur lors du téléchargement du CSV');
+            }
+          }}
           className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
         >
           Telecharger CSV
         </button>
-        <Link
-          to="/scan"
-          className="px-6 py-2 bg-success-600 text-white rounded-lg hover:bg-success-700 text-center"
+        <button
+          onClick={() => {
+            if (onNewScan) {
+              onNewScan();
+            } else {
+              navigate('/scan');
+            }
+          }}
+          className="px-6 py-2 bg-success-600 text-white rounded-lg hover:bg-success-700"
         >
           Nouveau Scan
-        </Link>
+        </button>
+      </div>
+
+      {/* Compliance Report Section */}
+      {vulnerabilities.length > 0 && (
+        <div className="mt-8">
+          <ComplianceReport vulnerabilities={vulnerabilities} />
+        </div>
+      )}
+
+      {/* Feedback Section */}
+      <div className="mt-8 pt-8 border-t border-gray-200">
+        <FeedbackForm scanId={scanId} systemName={systemName} />
       </div>
     </div>
   );
