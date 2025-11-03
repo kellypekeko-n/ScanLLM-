@@ -1,13 +1,20 @@
 /**
  * SystemScanResults Component
- * Affichage des résultats de scan système (Trivy-style)
+ * Affichage des résultats de scan système
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { exportSystemScanJSON, exportSystemScanCSV } from '../services/systemScanService';
+import { generateAllSolutions, exportSolutionsMarkdown } from '../services/cveSolutionsService';
 
 const SystemScanResults = ({ results }) => {
+  const [selectedVuln, setSelectedVuln] = useState(null);
+  const [showSolutions, setShowSolutions] = useState(false);
+  
   if (!results) return null;
+
+  // Générer toutes les solutions
+  const allSolutions = generateAllSolutions(results.vulnerabilities);
 
   const getSeverityColor = (severity) => {
     switch (severity) {
@@ -107,6 +114,24 @@ const SystemScanResults = ({ results }) => {
           Download CSV
         </button>
         <button
+          onClick={() => setShowSolutions(!showSolutions)}
+          className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-semibold flex items-center gap-2 shadow-lg"
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          {showSolutions ? 'Hide Solutions' : 'View Solutions'}
+        </button>
+        <button
+          onClick={() => exportSolutionsMarkdown(allSolutions, results.system_name)}
+          className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-semibold flex items-center gap-2 shadow-lg"
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          Export Solutions
+        </button>
+        <button
           onClick={() => window.location.href = '/scan-system'}
           className="px-6 py-3 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 font-semibold flex items-center gap-2 shadow-lg"
         >
@@ -116,6 +141,88 @@ const SystemScanResults = ({ results }) => {
           New Scan
         </button>
       </div>
+
+      {/* Solutions Section */}
+      {showSolutions && (
+        <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl shadow-lg border-2 border-purple-300 p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-3xl font-bold text-purple-900 flex items-center gap-3">
+              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+              Security Solutions ({allSolutions.length})
+            </h2>
+          </div>
+          
+          <div className="space-y-6">
+            {allSolutions.map((solution, index) => (
+              <div key={index} className="bg-white rounded-lg shadow-md border border-purple-200 overflow-hidden">
+                {/* Solution Header */}
+                <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold text-white mb-1">
+                        {solution.cve_id}: {solution.title}
+                      </h3>
+                      <p className="text-purple-100 text-sm">{solution.solution_type}</p>
+                    </div>
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                      solution.severity === 'CRITICAL' ? 'bg-red-200 text-red-900' :
+                      solution.severity === 'HIGH' ? 'bg-orange-200 text-orange-900' :
+                      solution.severity === 'MEDIUM' ? 'bg-yellow-200 text-yellow-900' :
+                      'bg-blue-200 text-blue-900'
+                    }`}>
+                      {solution.severity}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Solution Steps */}
+                <div className="p-6">
+                  <h4 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    Implementation Steps:
+                  </h4>
+                  
+                  <div className="space-y-4">
+                    {solution.solutions.map((step, stepIndex) => (
+                      <div key={stepIndex} className="border-l-4 border-purple-500 pl-4">
+                        <h5 className="font-semibold text-purple-900 mb-2">
+                          Step {step.step}: {step.title}
+                        </h5>
+                        <p className="text-gray-700 text-sm mb-3">{step.description}</p>
+                        <pre className="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto text-sm">
+                          <code>{step.code}</code>
+                        </pre>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Prevention Measures */}
+                  <div className="mt-6 bg-green-50 border border-green-200 rounded-lg p-4">
+                    <h4 className="font-bold text-green-900 mb-3 flex items-center gap-2">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Prevention Measures:
+                    </h4>
+                    <ul className="space-y-2">
+                      {solution.prevention.map((prev, prevIndex) => (
+                        <li key={prevIndex} className="flex items-start gap-2 text-sm text-green-800">
+                          <span className="text-green-600 mt-1">✓</span>
+                          <span>{prev}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Vulnerabilities List */}
       <div className="bg-white rounded-xl shadow-lg border border-gray-200">

@@ -9,6 +9,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 const History = () => {
   const { t } = useLanguage();
   const [scans, setScans] = useState([]);
+  const [activeTab, setActiveTab] = useState('prompts'); // 'prompts' ou 'systems'
 
   useEffect(() => {
     // Récupérer les scans depuis le localStorage (scans réels uniquement)
@@ -18,7 +19,15 @@ const History = () => {
         try {
           const parsedScans = JSON.parse(savedScans);
           // Filtrer pour ne garder que les scans avec des résultats valides
-          const validScans = parsedScans.filter(scan => scan.results && scan.results.analysis);
+          // Accepter les scans prompts (avec analysis) ET les scans système (avec vulnerabilities)
+          const validScans = parsedScans.filter(scan => {
+            if (!scan.results) return false;
+            // Scan prompt: doit avoir analysis
+            if (scan.type !== 'system' && scan.results.analysis) return true;
+            // Scan système: doit avoir vulnerabilities
+            if (scan.type === 'system' && scan.results.vulnerabilities) return true;
+            return false;
+          });
           setScans(validScans);
         } catch (error) {
           console.error('Error parsing scan history:', error);
@@ -57,7 +66,7 @@ const History = () => {
   };
 
   const getScoreBadge = (score) => {
-    if (score === null) return '-';
+    if (score === null || score === undefined) return <span className="text-gray-500">N/A</span>;
     const color = score >= 9 ? 'text-green-400' : score >= 7 ? 'text-yellow-400' : 'text-red-400';
     return <span className={`font-bold text-lg ${color}`}>{score.toFixed(1)}/10</span>;
   };
@@ -73,7 +82,14 @@ const History = () => {
     const savedScans = localStorage.getItem('scanHistory');
     if (savedScans) {
       const parsedScans = JSON.parse(savedScans);
-      const validScans = parsedScans.filter(scan => scan.results && scan.results.analysis);
+      const validScans = parsedScans.filter(scan => {
+        if (!scan.results) return false;
+        // Scan prompt: doit avoir analysis
+        if (scan.type !== 'system' && scan.results.analysis) return true;
+        // Scan système: doit avoir vulnerabilities
+        if (scan.type === 'system' && scan.results.vulnerabilities) return true;
+        return false;
+      });
       setScans(validScans);
     }
   };
@@ -114,6 +130,40 @@ const History = () => {
           </div>
         </div>
 
+        {/* Tabs */}
+        <div className="flex gap-2 mb-6">
+          <button
+            onClick={() => setActiveTab('prompts')}
+            className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+              activeTab === 'prompts'
+                ? 'bg-cyan-500 text-white'
+                : 'bg-gray-800/50 text-gray-400 hover:text-white border border-gray-700'
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+              </svg>
+              Prompts Testés ({scans.filter(s => s.type !== 'system').length})
+            </span>
+          </button>
+          <button
+            onClick={() => setActiveTab('systems')}
+            className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+              activeTab === 'systems'
+                ? 'bg-cyan-500 text-white'
+                : 'bg-gray-800/50 text-gray-400 hover:text-white border border-gray-700'
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+              </svg>
+              Scans Système ({scans.filter(s => s.type === 'system').length})
+            </span>
+          </button>
+        </div>
+
         {/* Tableau des scans */}
         <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
@@ -144,14 +194,16 @@ const History = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-700">
-                  {scans.map((scan) => (
+                  {scans
+                    .filter(scan => activeTab === 'prompts' ? scan.type !== 'system' : scan.type === 'system')
+                    .map((scan) => (
                   <tr key={scan.id} className="hover:bg-gray-700/30 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <code className="text-cyan-400 text-sm">{scan.id}</code>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <Link
-                        to={`/scan-results/${scan.id}`}
+                        to={scan.type === 'system' ? `/system-scan/${scan.id}` : `/scan-results/${scan.id}`}
                         className="text-white font-medium hover:text-cyan-400 transition-colors"
                       >
                         {scan.name}
@@ -176,12 +228,24 @@ const History = () => {
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <Link
-                        to={`/scan-results/${scan.id}`}
-                        className="text-cyan-400 hover:text-cyan-300 font-medium text-sm"
-                      >
-                        View →
-                      </Link>
+                      {scan.type === 'system' ? (
+                        <Link
+                          to="/solutions"
+                          className="text-purple-400 hover:text-purple-300 font-medium text-sm flex items-center gap-1"
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          View Solutions →
+                        </Link>
+                      ) : (
+                        <Link
+                          to={`/scan-results/${scan.id}`}
+                          className="text-cyan-400 hover:text-cyan-300 font-medium text-sm"
+                        >
+                          View Details →
+                        </Link>
+                      )}
                     </td>
                   </tr>
                 ))}

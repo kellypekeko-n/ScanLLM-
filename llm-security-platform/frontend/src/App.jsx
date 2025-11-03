@@ -14,6 +14,8 @@ import About from './pages/About';
 import Settings from './pages/Settings';
 import History from './pages/History';
 import ScanDetails from './pages/ScanDetails';
+import SystemScanDetails from './pages/SystemScanDetails';
+import Dashboard from './pages/Dashboard';
 
 function App() {
   return (
@@ -29,9 +31,10 @@ function App() {
             <Route path="/solutions/:vulnerabilityType" element={<Solutions />} />
             <Route path="/history" element={<History />} />
             <Route path="/scan-results/:scanId" element={<ScanDetails />} />
+            <Route path="/system-scan/:scanId" element={<SystemScanDetails />} />
             <Route path="/about" element={<About />} />
             <Route path="/settings" element={<Settings />} />
-            <Route path="/dashboard" element={<div className="max-w-7xl mx-auto px-4 py-12 bg-gradient-to-b from-gray-900 via-blue-900 to-gray-900 min-h-screen"><h1 className="text-3xl font-bold text-white">Dashboard (Coming Soon)</h1></div>} />
+            <Route path="/dashboard" element={<Dashboard />} />
           </Routes>
         </main>
 

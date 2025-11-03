@@ -34,8 +34,37 @@ const ScanSystem = () => {
     e.preventDefault();
     setError(null);
     
-    if (!formData.name) {
-      setError(t('error') + ': ' + t('systemName') + ' is required');
+    // Validation des champs obligatoires
+    if (!formData.name || !formData.endpoint || !formData.model || !formData.apiKey) {
+      setError('All fields are required');
+      return;
+    }
+
+    // Validation du nom système (alphanumeric + espaces + tirets)
+    const nameRegex = /^[a-zA-Z0-9\s\-_]{3,50}$/;
+    if (!nameRegex.test(formData.name)) {
+      setError('System Name: 3-50 characters, letters, numbers, spaces, hyphens, underscores only');
+      return;
+    }
+
+    // Validation de l'endpoint (URL valide)
+    const urlRegex = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/;
+    if (!urlRegex.test(formData.endpoint)) {
+      setError('Endpoint: Must be a valid URL (http:// or https://)');
+      return;
+    }
+
+    // Validation du modèle (format standard)
+    const modelRegex = /^[a-zA-Z0-9\-\.]{3,50}$/;
+    if (!modelRegex.test(formData.model)) {
+      setError('Model: 3-50 characters, letters, numbers, hyphens, dots only (e.g., gpt-3.5-turbo)');
+      return;
+    }
+
+    // Validation de l'API Key (format OpenAI)
+    const apiKeyRegex = /^sk-[a-zA-Z0-9]{20,}$/;
+    if (!apiKeyRegex.test(formData.apiKey)) {
+      setError('API Key: Must start with "sk-" followed by at least 20 alphanumeric characters');
       return;
     }
 
@@ -109,13 +138,16 @@ const ScanSystem = () => {
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 {t('systemName')} <span className="text-red-400">*</span>
+                <span className="block text-xs text-gray-500 mt-1">
+                  Format: 3-50 characters (letters, numbers, spaces, hyphens, underscores)
+                </span>
               </label>
               <input
                 type="text"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                placeholder={t('systemNamePlaceholder')}
+                placeholder="e.g., My LLM System"
                 className="w-full bg-gray-900/50 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-colors"
                 required
               />
@@ -124,37 +156,48 @@ const ScanSystem = () => {
             {/* Endpoint */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                {t('endpoint')}
+                {t('endpoint')} <span className="text-red-400">*</span>
+                <span className="block text-xs text-gray-500 mt-1">
+                  Format: Valid URL starting with http:// or https://
+                </span>
               </label>
               <input
                 type="url"
                 name="endpoint"
                 value={formData.endpoint}
                 onChange={handleChange}
-                placeholder={t('endpointPlaceholder')}
+                placeholder="https://api.example.com"
                 className="w-full bg-gray-900/50 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-colors"
+                required
               />
             </div>
 
             {/* Model */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Model (optional)
+                Model <span className="text-red-400">*</span>
+                <span className="block text-xs text-gray-500 mt-1">
+                  Format: 3-50 characters (letters, numbers, hyphens, dots)
+                </span>
               </label>
               <input
                 type="text"
                 name="model"
                 value={formData.model}
                 onChange={handleChange}
-                placeholder="e.g., gpt-3.5-turbo"
+                placeholder="gpt-3.5-turbo"
                 className="w-full bg-gray-900/50 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-colors"
+                required
               />
             </div>
 
             {/* API Key */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                API Key (optional)
+                API Key <span className="text-red-400">*</span>
+                <span className="block text-xs text-gray-500 mt-1">
+                  Format: Must start with "sk-" followed by at least 20 characters
+                </span>
               </label>
               <input
                 type="password"
@@ -163,6 +206,7 @@ const ScanSystem = () => {
                 onChange={handleChange}
                 placeholder="sk-..."
                 className="w-full bg-gray-900/50 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-colors"
+                required
               />
             </div>
 

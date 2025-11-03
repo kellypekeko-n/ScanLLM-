@@ -1,5 +1,5 @@
 /**
- * System Scan Service (Trivy-style)
+ * System Scan Service
  * Service pour scanner des systèmes et générer des CVE
  */
 
@@ -7,7 +7,7 @@ import axios from 'axios';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://llm-security-plateform.azurewebsites.net';
 
-// Simuler un scan système type Trivy
+// Simuler un scan système
 export const scanSystem = async (systemConfig) => {
   try {
     // Pour l'instant, on simule le scan car le backend n'a pas encore cet endpoint
@@ -45,7 +45,7 @@ const simulateSystemScan = async (systemConfig) => {
     },
     vulnerabilities: cves,
     metadata: {
-      scanner: 'LLM Security Platform (Trivy-style)',
+      scanner: 'LLM Security Platform - System Scan',
       version: '1.0.0',
       scan_duration: '3.2s',
     },
